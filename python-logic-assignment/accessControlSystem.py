@@ -16,7 +16,7 @@ def parseBoolean(value: str) -> bool:
 try:
     age = int(input("Age:"))
     has_id_input = input("Has ID:")
-    has_id = parse_boolean(has_id_input)
+    has_id = parseBoolean(has_id_input)
     accessControlSystem(age, has_id)
 except ValueError as e:
     print(f"Invalid input: {e}")
