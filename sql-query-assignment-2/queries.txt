@@ -1,0 +1,129 @@
+```sql 
+CREATE TABLE users (
+    user_id INTEGER PRIMARY KEY,
+    name TEXT,
+    signup_date DATE
+);
+
+CREATE TABLE orders (
+    order_id INTEGER PRIMARY KEY, 
+    user_id INTEGER, 
+    amount INTEGER
+);
+
+CREATE TABLE activity (
+    user_id INTEGER, 
+    login_count INTEGER
+);
+
+INSERT INTO users (user_id, name, signup_date) VALUES 
+(1, 'Aarav', '2023-01-10'),
+(2, 'Diya', '2023-02-14'),
+(3, 'Rohan', '2023-03-01'),
+(4, 'Meera', '2023-04-11'),
+(5, 'Kabir', '2023-05-06');
+
+INSERT INTO orders (order_id, user_id, amount) VALUES 
+(101, 1, 500),
+(102, 1, 700),
+(103, 2, 300),
+(104, 4, 900),
+(105, 4, 400);
+
+INSERT INTO activity (user_id, login_count) VALUES 
+(1, 25),
+(2, 10),
+(3, 5),
+(5, 12);
+
+-- 1. Retrieve each user’s name and order amount using an INNER JOIN between users and orders.
+SELECT u.name AS name, o.amount AS amount
+FROM users u
+INNER JOIN orders o ON u.user_id = o.user_id;
+
+-- 2. Retrieve user name and total order amount for each user.
+SELECT u.name AS name, SUM(o.amount) AS total_order_amount
+FROM users u
+INNER JOIN orders o ON u.user_id = o.user_id
+GROUP BY u.name;
+
+-- 3. Retrieve all users and their login counts, including users with no recorded activity.
+SELECT u.name AS name, a.login_count AS login_count
+FROM users u
+LEFT JOIN activity a ON u.user_id = a.user_id;
+
+-- 4. 4. Retrieve users who have never placed an order.
+SELECT u.name AS name
+FROM users u
+LEFT JOIN orders o ON u.user_id = o.user_id
+WHERE o.order_id IS NULL;
+
+-- 5.  Combine all three tables to return:
+-- user_id
+-- name
+-- total_order_amount
+-- login_count
+SELECT
+    u.user_id AS user_id,
+    u.name AS name,
+    COALESCE(SUM(o.amount), 0) AS total_order_amount,
+    COALESCE(MAX(a.login_count), 0) AS login_count
+FROM users u
+LEFT JOIN orders o ON u.user_id = o.user_id
+LEFT JOIN activity a ON u.user_id = a.user_id
+GROUP BY u.user_id, u.name;
+
+-- 6. Retrieve users who placed orders greater than 400.
+SELECT DISTINCT u.name AS name
+FROM users u
+INNER JOIN orders o ON u.user_id = o.user_id
+WHERE o.amount > 400;
+
+-- 7. Retrieve the top 3 users by total order amount.
+SELECT
+    u.name AS name,
+    SUM(o.amount) AS total_order_amount
+FROM users u
+INNER JOIN orders o ON u.user_id = o.user_id
+GROUP BY u.user_id, u.name
+ORDER BY total_order_amount DESC
+LIMIT 3;
+
+-- 8. Retrieve users sorted by:
+-- total order amount (descending)
+-- login count (descending)
+SELECT
+    u.name AS name,
+    COALESCE(SUM(o.amount), 0) AS total_order_amount,
+    COALESCE(MAX(a.login_count), 0) AS login_count
+FROM users u
+LEFT JOIN orders o ON u.user_id = o.user_id
+LEFT JOIN activity a ON u.user_id = a.user_id
+GROUP BY u.user_id, u.name
+ORDER BY total_order_amount DESC, login_count DESC;
+
+-- 9.  Return the average order amount per user.
+SELECT
+    u.name AS name,
+    COALESCE(AVG(o.amount), 0) AS average_order_amount
+FROM users u
+LEFT JOIN orders o ON u.user_id = o.user_id
+GROUP BY u.user_id, u.name;
+
+-- 10. Write one combined query that:
+-- Selects user_id, name, total_order_amount
+-- Includes login counts
+-- Sorts by total order amount (descending)
+-- Returns top 3 users
+SELECT
+    u.user_id AS user_id,
+    u.name AS name,
+    COALESCE(SUM(o.amount), 0) AS total_order_amount,
+    COALESCE(MAX(a.login_count), 0) AS login_count
+FROM users u
+LEFT JOIN orders o ON u.user_id = o.user_id
+LEFT JOIN activity a ON u.user_id = a.user_id
+GROUP BY u.user_id, u.name
+ORDER BY total_order_amount DESC
+LIMIT 3;
+```
